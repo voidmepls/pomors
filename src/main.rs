@@ -2,6 +2,8 @@
 
 use std::time::Duration;
 use std::thread::sleep;
+use std::io::{self, Write};
+
 
 #[derive(Debug)]
 struct Timer {
@@ -20,45 +22,38 @@ impl Timer {
     }
 
     fn display_timer(&mut self) {
-        //TODO : Add a better display than just println
         while self.duration > 0 {
             self.is_running = true;
 
-            println!("{}", self.duration);
+            print!("\r{}", self.duration);
+            io::stdout().flush().unwrap();
             self.duration -= 1;
             sleep(Duration::new(1, 0));
-
-            if self.duration == 0 {
-                self.is_running = false;
-            }
         }
+        println!("Work done!");
     }
 
     fn start(&mut self) {
         self.is_running = true;
+        self.display_timer();
     } 
-
-    fn pause(&mut self) {
-        self.is_running = false;
-    }
-
-    fn reset(&mut self) {
-        self.elapsed = 0;
-        self.is_running = false;
-    }
-
-    fn update(&mut self) {
-        if self.is_running {
-            //TODO  
-        }
-    }
 }
 
+fn prompt_for_duration() -> u32 {
+    let mut user_input = String::new();
+    
+    println!("Enter how many time you want to work in seconds :");
+
+    io::stdin().read_line(&mut user_input).expect("Failed to read user input");
+    let timer = user_input.trim().parse().expect("Failed to parse user input");
+
+    timer
+}
 
 fn main() {
-    let mut pomodoro = Timer::new(3);
+    let timer = prompt_for_duration();
 
-    Timer::display_timer(&mut pomodoro);
+    let mut pomodoro = Timer::new(timer);
 
-    println!("{:#?}", pomodoro);
+    Timer::start(&mut pomodoro);
 }
